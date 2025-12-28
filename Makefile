@@ -1,6 +1,6 @@
 CC      = clang
 CFLAGS  = -std=c11 -Wall -Wextra -Wpedantic -g
-SRC     = src/main.c
+SRC     = src/main.c src/decoder.c
 OUT     = build/8086sim
 
 all:
