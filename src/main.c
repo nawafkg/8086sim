@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "decoder.h"
+#include "simulator.h"
+#include "cpu.h"
+
+CPU cpu;
 
 int main(int argc, char *argv[])
 {
@@ -15,14 +19,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    FILE *out = fopen(argv[2], "w");
+    FILE *out = fopen(argv[2], "w+");
     if (!out) {
         perror("Failed to open output file");
         fclose(in);
         return 1;
     }
 
+    cpu_init(&cpu);
     decode_file(in, out);
+    rewind(out);
+    simulate(&cpu, out);
+    cpu_print(&cpu);
 
     fclose(in);
     fclose(out);
