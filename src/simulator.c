@@ -68,6 +68,79 @@ void simulate_mov(CPU *cpu) {
     }
 }
 
+void simulate_add(CPU *cpu) {
+    char *p = &line;
+    p = consume_word(p);
+    p = consume_word(p);
+    Reg16 reg1 = parse_reg(&word);
+    long imm;
+
+    p = consume_word(p);
+    Reg16 reg2 = parse_reg(&word);
+    if(reg2 == REG_UNKNOWN) {
+       imm = strtol(word, NULL, 0);
+       cpu->r[reg1] += imm;
+    } else {
+        cpu->r[reg1] += cpu->r[reg2];
+    }
+
+    //zf
+    if(cpu->r[reg1] == 0) cpu->f[ZF] = 1;
+    else cpu->f[ZF] = 0;
+
+    //sf
+    cpu->f[SF] = (cpu->r[reg1] & 0xFFFF) >> 15;
+}
+
+void simulate_sub(CPU *cpu) {
+    char *p = &line;
+    p = consume_word(p);
+    p = consume_word(p);
+    Reg16 reg1 = parse_reg(&word);
+    long imm;
+
+    p = consume_word(p);
+    Reg16 reg2 = parse_reg(&word);
+    if(reg2 == REG_UNKNOWN) {
+       imm = strtol(word, NULL, 0);
+       cpu->r[reg1] -= imm;
+    } else {
+        cpu->r[reg1] -= cpu->r[reg2];
+    }
+    
+    //zf
+    if(cpu->r[reg1] == 0) cpu->f[ZF] = 1;
+    else cpu->f[ZF] = 0;
+
+    //sf
+    cpu->f[SF] = (cpu->r[reg1] & 0xFFFF) >> 15;
+}
+
+void simulate_cmp(CPU *cpu) {
+    char *p = &line;
+    p = consume_word(p);
+    p = consume_word(p);
+    Reg16 reg1 = parse_reg(&word);
+    long imm;
+    u_int16_t temp = cpu->r[reg1];
+
+    p = consume_word(p);
+    Reg16 reg2 = parse_reg(&word);
+    if(reg2 == REG_UNKNOWN) {
+       imm = strtol(word, NULL, 0);
+       temp -= imm;
+    } else {
+        temp -= cpu->r[reg2];
+    }
+
+    //zf
+    if(temp == 0) cpu->f[ZF] = 1;
+    else cpu->f[ZF] = 0;
+
+    //sf
+    temp = (cpu->r[reg1] & 0xFFFF) >> 15;
+}
+
 
 
 void simulate(CPU *cpu, FILE *in) {
@@ -80,6 +153,18 @@ void simulate(CPU *cpu, FILE *in) {
             simulate_mov(cpu);
             break;
         
+        case OP_ADD:
+            simulate_add(cpu);
+            break;
+
+        case OP_SUB:
+            simulate_sub(cpu);
+            break;
+
+        case OP_CMP:
+            simulate_cmp(cpu);
+            break;
+
         default:
             break;
         }
